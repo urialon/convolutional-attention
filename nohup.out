@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "convolutional_attention/copy_conv_rec_learner.py", line 11, in <module>
+    from experimenter import ExperimentLogger
+ImportError: No module named experimenter
