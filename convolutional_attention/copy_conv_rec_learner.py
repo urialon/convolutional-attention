@@ -10,9 +10,9 @@ import numpy as np
 import re
 from experimenter import ExperimentLogger
 
-from convolutional_attention.copy_conv_rec_model import CopyConvolutionalRecurrentAttentionalModel
-from convolutional_attention.f1_evaluator import F1Evaluator
-from convolutional_attention.token_naming_data import TokenCodeNamingData
+from copy_conv_rec_model import CopyConvolutionalRecurrentAttentionalModel
+from f1_evaluator import F1Evaluator
+from token_naming_data import TokenCodeNamingData
 
 class ConvolutionalCopyAttentionalRecurrentLearner:
 
@@ -21,6 +21,25 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
         self.naming_data = None
         self.padding_size = self.hyperparameters["layer1_window_size"] + self.hyperparameters["layer2_window_size"] + self.hyperparameters["layer3_window_size"] - 3
         self.parameters = None
+        self.pretrained_embeddings_dictionary = self.load_pretrained_embeddings(hyperparameters)
+
+    def load_pretrained_embeddings(self, hyperparameters):
+        if not hyperparameters.has_key("pretrained_embeddings_file"):
+            return {}
+        with open(hyperparameters["pretrained_embeddings_file"], 'r') as vectors_file:
+            name_to_vec = {}
+            for i, line in enumerate(vectors_file):
+                line_tokens = line.rstrip().split(' ')
+                if i == 0:
+                    pretrained_vocab_size = int(line_tokens[0])
+                    dim = int(line_tokens[1])
+                    assert dim == hyperparameters["D"], "Pretrained embeddings (%d) is not equal to requested embeddings space (%d)" % (dim, hyperparameters("D"))
+                else:
+                    vector = np.array([float(x) for x in line_tokens[1:]])
+                    assert vector.size == dim
+                    name_to_vec[line_tokens[0]] = vector
+            return name_to_vec
+
 
     def train(self, input_file, patience=5, max_epochs=1000, minibatch_size=500):
         assert self.parameters is None, "Model is already trained"
@@ -36,7 +55,7 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
 
         # Create theano model and train
         model = CopyConvolutionalRecurrentAttentionalModel(self.hyperparameters, len(self.naming_data.all_tokens_dictionary),
-                                   self.naming_data.name_empirical_dist)
+                                   self.naming_data.name_empirical_dist, self.naming_data.all_tokens_dictionary, self.pretrained_embeddings_dictionary)
         self.model = model
 
         def compute_validation_score_names():
@@ -260,7 +279,7 @@ def run_from_config(params, *args):
 
 if __name__ == "__main__":
     if len(sys.argv) < 5:
-        print 'Usage <input_file> <max_num_epochs> d <test_file>'
+        print 'Usage <input_file> <max_num_epochs> d <test_file> [pretrained_embeddings_file]'
         sys.exit(-1)
 
     input_file = sys.argv[1]
@@ -289,6 +308,8 @@ if __name__ == "__main__":
     params["train_file"] = input_file
     if len(sys.argv) > 4:
         params["test_file"] = sys.argv[4]
+    if len(sys.argv) > 5:
+        params["pretrained_embeddings_file"] = sys.argv[5]
     with ExperimentLogger("ConvolutionalCopyAttentionalRecurrentLearner", params) as experiment_log:
         if max_num_epochs:
             model = ConvolutionalCopyAttentionalRecurrentLearner(params)
