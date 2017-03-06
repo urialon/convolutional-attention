@@ -1,4 +1,7 @@
+Using gpu device 0: Tesla K80 (CNMeM is disabled, cuDNN not available)
 Traceback (most recent call last):
-  File "convolutional_attention/copy_conv_rec_learner.py", line 11, in <module>
-    from experimenter import ExperimentLogger
-ImportError: No module named experimenter
+  File "convolutional_attention/copy_conv_rec_learner.py", line 13, in <module>
+    from copy_conv_rec_model import CopyConvolutionalRecurrentAttentionalModel
+  File "/home/urialon/convolutional-attention/convolutional_attention/copy_conv_rec_model.py", line 6, in <module>
+    from theanoutils.optimization import nesterov_rmsprop_multiple, logsumexp, dropout_multiple, log_softmax
+ImportError: No module named theanoutils.optimization
