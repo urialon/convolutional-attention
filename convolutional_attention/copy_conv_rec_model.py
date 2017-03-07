@@ -8,7 +8,7 @@ floatX = theano.config.floatX
 
 
 class CopyConvolutionalRecurrentAttentionalModel(object):
-    def __init__(self, hyperparameters, all_voc_size, empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary):
+    def __init__(self, hyperparameters, all_voc_size, empirical_name_dist, tokens_dictionary = None, pretrained_embeddings_dictionary = None):
         self.D = hyperparameters["D"]
 
         self.hyperparameters = hyperparameters
@@ -20,15 +20,17 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
     def __init_parameter(self, empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary):
 
         all_name_rep = np.random.randn(self.all_voc_size, self.D) * 10 ** self.hyperparameters["log_name_rep_init_scale"]
-        # Overriding vectors that exist in the pretrained dictionary
-        found_pretrained_word_count = 0
-        for word,vector in pretrained_embeddings_dictionary.iteritems():
-            id_in_existing_dictionary = tokens_dictionary.get_id_or_none(word)
-            if not id_in_existing_dictionary == None:
-                all_name_rep[id_in_existing_dictionary] = vector
-                found_pretrained_word_count += 1
 
-        print "Found %d pretrained words, out of %d total tokens, and out of %d total preterained words" % (found_pretrained_word_count, len(tokens_dictionary.token_to_id), len(pretrained_embeddings_dictionary))
+        if (not tokens_dictionary == None) and (not pretrained_embeddings_dictionary == None):
+            # Overriding vectors that exist in the pretrained dictionary
+            found_pretrained_word_count = 0
+            for word,vector in pretrained_embeddings_dictionary.iteritems():
+                id_in_existing_dictionary = tokens_dictionary.get_id_or_none(word)
+                if not id_in_existing_dictionary == None:
+                    all_name_rep[id_in_existing_dictionary] = vector
+                    found_pretrained_word_count += 1
+
+            print "Found %d pretrained words, out of %d total tokens, and out of %d total preterained words" % (found_pretrained_word_count, len(tokens_dictionary.token_to_id), len(pretrained_embeddings_dictionary))
 
         self.all_name_reps = theano.shared(all_name_rep.astype(floatX), name="code_name_reps")
 
