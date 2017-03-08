@@ -41,7 +41,7 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
             return name_to_vec
 
 
-    def train(self, input_file, patience=5, max_epochs=1000, minibatch_size=500):
+    def train(self, input_file, patience=10, max_epochs=1000, minibatch_size=500):
         assert self.parameters is None, "Model is already trained"
         print "saving best result so far to %s"%(
             "copy_convolutional_att_rec_model" +
