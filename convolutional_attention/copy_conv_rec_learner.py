@@ -318,7 +318,7 @@ if __name__ == "__main__":
 
         if params.get("test_file") is None:
             exit()
-
+        print 'Starting testing'
         model2 = ConvolutionalCopyAttentionalRecurrentLearner.load("copy_convolutional_att_rec_model" + os.path.basename(params["train_file"]) + ".pkl")
 
         test_data, original_names = model2.naming_data.get_data_in_recurrent_copy_convolution_format(params["test_file"], model2.padding_size)
@@ -327,6 +327,8 @@ if __name__ == "__main__":
         #print "Test name_ll=%s" % name_ll
 
         eval = F1Evaluator(model2)
+
+        print 'Computing F1'
         point_suggestion_eval = eval.compute_names_f1(test_code, original_names,
                                                       model2.naming_data.all_tokens_dictionary.get_all_names())
         print point_suggestion_eval
