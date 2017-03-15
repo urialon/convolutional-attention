@@ -30,7 +30,8 @@ class F1Evaluator:
             unk_word_accuracy = [self.unk_acc(suggestion[0], real_targets[i].split(','), token_dictionary) for suggestion in result]
             precision_recall = [token_precision_recall(suggestion[0], real_targets[i].split(',')) for suggestion in result]
             result_accumulator.add_result(confidences, is_correct, is_unkd, precision_recall, unk_word_accuracy)
-
+            if (i % 10 == 0):
+                print "Finished computing F1 for " + str(i)
         return result_accumulator
 
     def unk_acc(self, suggested_subtokens, real_subtokens, token_dictionary):
