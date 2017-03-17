@@ -7,6 +7,7 @@ import multiprocessing
 
 import numpy as np
 
+
 def compute_single_name(tuple):
         result = tuple[0].predict_name(np.atleast_2d(tuple[1]))
         real_targets = tuple[2]
@@ -16,9 +17,17 @@ def compute_single_name(tuple):
         confidences = [suggestion[1] for suggestion in result]
         is_correct = [','.join(suggestion[0]) == real_targets for suggestion in result]
         is_unkd = [is_unk(''.join(suggestion[0])) for suggestion in result]
-        unk_word_accuracy = [F1Evaluator.unk_acc(suggestion[0], real_targets.split(','), token_dictionary) for suggestion in result]
+        unk_word_accuracy = [unk_acc(suggestion[0], real_targets.split(','), token_dictionary) for suggestion in result]
         precision_recall = [token_precision_recall(suggestion[0], real_targets.split(',')) for suggestion in result]
         return (confidences, is_correct, is_unkd, precision_recall, unk_word_accuracy)
+
+
+def unk_acc(suggested_subtokens, real_subtokens, token_dictionary):
+    real_unk_subtokens = set(t for t in real_subtokens if t not in token_dictionary)
+    if len(real_unk_subtokens) == 0:
+        return None
+    return float(len([t for t in suggested_subtokens if t in real_unk_subtokens])) / len(real_unk_subtokens)
+
 
 class F1Evaluator:
     def __init__(self, model):
@@ -56,13 +65,6 @@ class F1Evaluator:
             result_accumulator.add_result(confidences, is_correct, is_unkd, precision_recall, unk_word_accuracy)
             if (i % 10 == 0):
                 print "Finished computing F1 for " + str(i)'''
-
-
-    def unk_acc(self, suggested_subtokens, real_subtokens, token_dictionary):
-        real_unk_subtokens = set(t for t in real_subtokens if t not in token_dictionary)
-        if len(real_unk_subtokens) == 0:
-            return None
-        return float(len([t for t in suggested_subtokens if t in real_unk_subtokens])) / len(real_unk_subtokens)
 
 
 def is_unk(joined_tokens):
