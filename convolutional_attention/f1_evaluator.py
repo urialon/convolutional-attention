@@ -43,7 +43,7 @@ class F1Evaluator:
         :rtype: PointSuggestionEvaluator
         """
         result_accumulator = PointSuggestionEvaluator()
-        p = multiprocessing.Pool(multiprocessing.cpu_count())
+        p = multiprocessing.Pool(10)
         print "Starting to compute F1"
         parameters = [(self.model, features[i], real_targets[i], token_dictionary) for i in xrange(features.shape[0])]
         results = p.map(compute_single_name, parameters)
