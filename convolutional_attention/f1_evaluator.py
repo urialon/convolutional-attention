@@ -9,9 +9,9 @@ import numpy as np
 
 
 def compute_single_name(tuple):
-        result = tuple[0].predict_name(np.atleast_2d(tuple[1]))
-        real_targets = tuple[2]
-        token_dictionary = tuple[3]
+        result = tuple[0]
+        real_targets = tuple[1]
+        token_dictionary = tuple[2]
         #print real_targets[i], result
 
         confidences = [suggestion[1] for suggestion in result]
@@ -43,9 +43,14 @@ class F1Evaluator:
         :rtype: PointSuggestionEvaluator
         """
         result_accumulator = PointSuggestionEvaluator()
-        p = multiprocessing.Pool(10)
-        print "Starting to compute F1"
-        parameters = [(self.model, features[i], real_targets[i], token_dictionary) for i in xrange(features.shape[0])]
+        p = multiprocessing.Pool(multiprocessing.cpu_count())
+        print "Starting to compute F1 predictions"
+        parameters = []
+        for i in xrange(features.shape[0]):
+            parameters.append((self.model.predict_name(np.atleast_2d(features[i])), real_targets[i], token_dictionary))
+        #parameters = [(self.model.predict_name(np.atleast_2d(features[i])), real_targets[i], token_dictionary) for i in xrange(features.shape[0])]
+        print "Finished predicting and preparing parameters"
+        print "Starting to compute results in parallel"
         results = p.map(compute_single_name, parameters)
         print "Finished calculating F1, adding results"
         for confidences, is_correct, is_unkd, precision_recall, unk_word_accuracy in results:
