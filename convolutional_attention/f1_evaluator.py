@@ -3,14 +3,28 @@ import heapq
 import os
 from scipy.integrate import simps
 import os.path
+import multiprocessing
 
 import numpy as np
 
+def compute_single_name(tuple):
+        result = tuple[0].predict_name(np.atleast_2d(tuple[1]))
+        real_targets = tuple[2]
+        token_dictionary = tuple[3]
+        #print real_targets[i], result
+
+        confidences = [suggestion[1] for suggestion in result]
+        is_correct = [','.join(suggestion[0]) == real_targets for suggestion in result]
+        is_unkd = [is_unk(''.join(suggestion[0])) for suggestion in result]
+        unk_word_accuracy = [F1Evaluator.unk_acc(suggestion[0], real_targets.split(','), token_dictionary) for suggestion in result]
+        precision_recall = [token_precision_recall(suggestion[0], real_targets.split(',')) for suggestion in result]
+        return (confidences, is_correct, is_unkd, precision_recall, unk_word_accuracy)
 
 class F1Evaluator:
     def __init__(self, model):
         self.model = model
         self.max_predicted_identifier_size = 6
+
 
     def compute_names_f1(self, features, real_targets, token_dictionary):
         """
@@ -20,7 +34,17 @@ class F1Evaluator:
         :rtype: PointSuggestionEvaluator
         """
         result_accumulator = PointSuggestionEvaluator()
-        for i in xrange(features.shape[0]):
+        p = multiprocessing.Pool(multiprocessing.cpu_count())
+        print "Starting to compute F1"
+        parameters = [(self.model, features[i], real_targets[i], token_dictionary) for i in xrange(features.shape[0])]
+        results = p.map(compute_single_name, parameters)
+        print "Finished calculating F1, adding results"
+        for confidences, is_correct, is_unkd, precision_recall, unk_word_accuracy in results:
+            result_accumulator.add_result(confidences, is_correct, is_unkd, precision_recall, unk_word_accuracy)
+        print "Finished adding results"
+        return result_accumulator
+
+        '''for i in xrange(features.shape[0]):
             result = self.model.predict_name(np.atleast_2d(features[i]))
             #print real_targets[i], result
 
@@ -31,8 +55,8 @@ class F1Evaluator:
             precision_recall = [token_precision_recall(suggestion[0], real_targets[i].split(',')) for suggestion in result]
             result_accumulator.add_result(confidences, is_correct, is_unkd, precision_recall, unk_word_accuracy)
             if (i % 10 == 0):
-                print "Finished computing F1 for " + str(i)
-        return result_accumulator
+                print "Finished computing F1 for " + str(i)'''
+
 
     def unk_acc(self, suggested_subtokens, real_subtokens, token_dictionary):
         real_unk_subtokens = set(t for t in real_subtokens if t not in token_dictionary)
