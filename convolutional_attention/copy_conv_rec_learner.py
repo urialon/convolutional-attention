@@ -13,6 +13,7 @@ from experimenter import ExperimentLogger
 from copy_conv_rec_model import CopyConvolutionalRecurrentAttentionalModel
 from f1_evaluator import F1Evaluator
 from token_naming_data import TokenCodeNamingData
+import theano
 
 floatX = theano.config.floatX
 
