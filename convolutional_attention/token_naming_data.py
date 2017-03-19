@@ -40,7 +40,7 @@ class TokenCodeNamingData:
             [chain.from_iterable(code), chain.from_iterable(names)]), 5)
         self.all_tokens_dictionary.add_or_get_id(self.NONE)
         if (load_all_embeddings):
-            for word,vector in pretrained_embeddings_dictionary:
+            for word,vector in pretrained_embeddings_dictionary.iteritems():
                 self.all_tokens_dictionary.add_or_get_id(word)
         self.name_empirical_dist = self.__get_empirical_distribution(self.all_tokens_dictionary, chain.from_iterable(names))
 
