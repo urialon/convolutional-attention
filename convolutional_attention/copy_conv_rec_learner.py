@@ -53,7 +53,7 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
             if self.naming_data.all_tokens_dictionary.is_unk(word):
                 new_id = self.naming_data.all_tokens_dictionary.add_or_get_id(word)
                 new_vectors.append(np.array(vec))
-        existing_vectors = np.concatenate(existing_vectors, np.array(new_vectors))
+        existing_vectors = np.concatenate((existing_vectors, np.array(new_vectors)))
         self.model.all_name_reps.set_value(existing_vectors)
         print "[%s] Finished loading embeddings for test" % (time.asctime())
 
