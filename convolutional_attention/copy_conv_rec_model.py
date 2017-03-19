@@ -36,7 +36,8 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
                 else:
                     all_name_rep[id_in_existing_dictionary] = vector
                     found_pretrained_word_count += 1
-            all_name_rep = all_name_rep.concatenate((all_name_rep, np.array(added_embeddings)))
+            if load_all_embeddings:
+                all_name_rep = np.concatenate((all_name_rep, np.array(added_embeddings)))
             print "[%s] Done loading pretrained embeddings, total loaded: %d" % (time.asctime(), total_loaded)
             print "Found %d pretrained words, out of %d total tokens, and out of %d total preterained words" % (found_pretrained_word_count, len(tokens_dictionary.token_to_id), len(pretrained_embeddings_dictionary))
 
