@@ -16,7 +16,7 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
         self.__check_all_hyperparmeters_exist()
         self.all_voc_size = all_voc_size
 
-        self.__init_parameter(empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary, load_all_embeddings)
+        self.__init_parameter(empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary)
 
     def __init_parameter(self, empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary, load_all_embeddings = False):
 
@@ -29,11 +29,7 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
             total_loaded = 0
             for word,vector in pretrained_embeddings_dictionary.iteritems():
                 id_in_existing_dictionary = tokens_dictionary.get_id_or_none(word)
-                if (id_in_existing_dictionary is None) and load_all_embeddings:
-                    tokens_dictionary.add_or_get_id(word)
-                    added_embeddings.append(vector)
-                    total_loaded += 1
-                else:
+                if not id_in_existing_dictionary is None:
                     all_name_rep[id_in_existing_dictionary] = vector
                     found_pretrained_word_count += 1
             if load_all_embeddings:

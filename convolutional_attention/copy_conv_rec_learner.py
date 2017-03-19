@@ -69,13 +69,13 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
             ".pkl")
         print "Extracting data..."
         # Get data (train, validation)
-        train_data, validation_data, self.naming_data = TokenCodeNamingData.get_data_in_recurrent_copy_convolution_format_with_validation(input_file, .92, self.padding_size)
+        train_data, validation_data, self.naming_data = TokenCodeNamingData.get_data_in_recurrent_copy_convolution_format_with_validation(input_file, .92, self.padding_size, self.pretrained_embeddings_dictionary, self.load_all_embeddings)
         train_name_targets, train_code_sentences, train_code, train_target_is_unk, train_copy_vectors = train_data
         val_name_targets, val_code_sentences, val_code, val_target_is_unk, val_copy_vectors = validation_data
 
         # Create theano model and train
         model = CopyConvolutionalRecurrentAttentionalModel(self.hyperparameters, len(self.naming_data.all_tokens_dictionary),
-                                   self.naming_data.name_empirical_dist, self.naming_data.all_tokens_dictionary, self.pretrained_embeddings_dictionary, self.load_all_embeddings)
+                                   self.naming_data.name_empirical_dist, self.naming_data.all_tokens_dictionary, self.pretrained_embeddings_dictionary)
         self.model = model
 
         def compute_validation_score_names():

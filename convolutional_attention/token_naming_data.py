@@ -32,13 +32,16 @@ class TokenCodeNamingData:
 
         return names, code, original_names
 
-    def __init__(self, names, code):
+    def __init__(self, names, code, pretrained_embeddings_dictionary, load_all_embeddings):
         self.name_dictionary = FeatureDictionary.get_feature_dictionary_for(chain.from_iterable(names), 2)
         self.name_dictionary.add_or_get_id(self.NONE)
 
         self.all_tokens_dictionary = FeatureDictionary.get_feature_dictionary_for(chain.from_iterable(
             [chain.from_iterable(code), chain.from_iterable(names)]), 5)
         self.all_tokens_dictionary.add_or_get_id(self.NONE)
+        if (load_all_embeddings):
+            for word,vector in pretrained_embeddings_dictionary:
+                self.all_tokens_dictionary.add_or_get_id(word)
         self.name_empirical_dist = self.__get_empirical_distribution(self.all_tokens_dictionary, chain.from_iterable(names))
 
     @staticmethod
@@ -292,7 +295,7 @@ class TokenCodeNamingData:
                 naming.get_data_for_recurrent_convolution(names[idxs[lim:]], code[idxs[lim:]], min_code_size), naming
 
     @staticmethod
-    def get_data_in_recurrent_copy_convolution_format_with_validation(input_file, pct_train, min_code_size):
+    def get_data_in_recurrent_copy_convolution_format_with_validation(input_file, pct_train, min_code_size, pretrained_embeddings_dictionary = None, load_all_embeddings = False):
         assert pct_train < 1
         assert pct_train > 0
         names, code, original_names = TokenCodeNamingData.__get_file_data(input_file)
@@ -302,7 +305,7 @@ class TokenCodeNamingData:
         lim = int(pct_train * len(names))
         idxs = np.arange(len(names))
         np.random.shuffle(idxs)
-        naming = TokenCodeNamingData(names[idxs[:lim]], code[idxs[:lim]])
+        naming = TokenCodeNamingData(names[idxs[:lim]], code[idxs[:lim]], pretrained_embeddings_dictionary, load_all_embeddings)
         return naming.get_data_for_recurrent_copy_convolution(names[idxs[:lim]], code[idxs[:lim]], min_code_size),\
                 naming.get_data_for_recurrent_copy_convolution(names[idxs[lim:]], code[idxs[lim:]], min_code_size), naming
 
