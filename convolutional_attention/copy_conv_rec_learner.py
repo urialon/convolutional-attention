@@ -58,6 +58,7 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
                 new_vectors.append(np.array(vec))
         existing_vectors = np.concatenate((existing_vectors, np.array(new_vectors).astype(floatX)))
         self.model.all_name_reps.set_value(existing_vectors)
+        self.model.__compile_model_functions()
         print "[%s] Finished loading embeddings for test" % (time.asctime())
 
     def train(self, input_file, patience=10, max_epochs=1000, minibatch_size=500):
