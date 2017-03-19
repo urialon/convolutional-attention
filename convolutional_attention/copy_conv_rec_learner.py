@@ -40,6 +40,14 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
                     name_to_vec[line_tokens[0]] = vector
             return name_to_vec
 
+    def load_embeddings_for_test(self, hyperparameters):
+        existing_vectors = self.model.all_name_reps.get_value()
+        pretrained_embeddings_dictionary = self.load_embeddings_for_test(hyperparameters)
+        for word, vec in pretrained_embeddings_dictionary.iteritems():
+            if self.naming_data.all_tokens_dictionary.is_unk(word):
+                new_id = self.naming_data.all_tokens_dictionary.add_or_get_id(word)
+                existing_vectors = np.concatenate((existing_vectors,vec))
+        self.model.all_name_reps.set_value(existing_vectors)
 
     def train(self, input_file, patience=10, max_epochs=1000, minibatch_size=500):
         assert self.parameters is None, "Model is already trained"
@@ -320,6 +328,8 @@ if __name__ == "__main__":
             exit()
         print 'Starting testing'
         model2 = ConvolutionalCopyAttentionalRecurrentLearner.load("copy_convolutional_att_rec_model" + os.path.basename(params["train_file"]) + ".pkl")
+        if len(sys.argv) > 6 and sys.argv[6] == '--load_for_test':
+             model2.load_embeddings_for_test(params)
 
         test_data, original_names = model2.naming_data.get_data_in_recurrent_copy_convolution_format(params["test_file"], model2.padding_size)
         test_name_targets, test_code_sentences, test_code, test_target_is_unk, test_copy_vectors = test_data
