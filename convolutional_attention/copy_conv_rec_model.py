@@ -29,7 +29,7 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
             total_loaded = 0
             for word,vector in pretrained_embeddings_dictionary.iteritems():
                 id_in_existing_dictionary = tokens_dictionary.get_id_or_none(word)
-                if id_in_existing_dictionary == None:
+                if (id_in_existing_dictionary is None) and load_all_embeddings:
                     tokens_dictionary.add_or_get_id(word)
                     added_embeddings.append(vector)
                     total_loaded += 1
