@@ -2,6 +2,7 @@ import theano
 from theano import tensor as T
 import numpy as np
 from theano.tensor.shared_randomstreams import RandomStreams
+import time
 
 from theanoutils.optimization import nesterov_rmsprop_multiple, logsumexp, dropout_multiple, log_softmax
 floatX = theano.config.floatX
@@ -17,22 +18,25 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
 
         self.__init_parameter(empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary, load_all_embeddings)
 
-    def __init_parameter(self, empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary):
+    def __init_parameter(self, empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary, load_all_embeddings = False):
 
         all_name_rep = np.random.randn(self.all_voc_size, self.D) * 10 ** self.hyperparameters["log_name_rep_init_scale"]
 
         if (not tokens_dictionary == None) and (not pretrained_embeddings_dictionary == None):
             # Overriding vectors that exist in the pretrained dictionary
+            print "[%s] Loading pretrained embeddings (load_all_embeddings=%s)" % (time.asctime(), str(load_all_embeddings))
             found_pretrained_word_count = 0
+            total_loaded = 0
             for word,vector in pretrained_embeddings_dictionary.iteritems():
                 id_in_existing_dictionary = tokens_dictionary.get_id_or_none(word)
                 if id_in_existing_dictionary == None:
                     tokens_dictionary.add_or_get_id(word)
                     all_name_rep = np.concatenate((all_name_rep,np.array([vector])))
+                    total_loaded += 1
                 else:
                     all_name_rep[id_in_existing_dictionary] = vector
                     found_pretrained_word_count += 1
-
+            print "[%s] Done loading pretrained embeddings, total loaded: %d" % (time.asctime(), total_loaded)
             print "Found %d pretrained words, out of %d total tokens, and out of %d total preterained words" % (found_pretrained_word_count, len(tokens_dictionary.token_to_id), len(pretrained_embeddings_dictionary))
 
         self.all_name_reps = theano.shared(all_name_rep.astype(floatX), name="code_name_reps")

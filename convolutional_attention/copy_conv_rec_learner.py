@@ -335,7 +335,9 @@ if __name__ == "__main__":
         print 'Starting testing'
         model2 = ConvolutionalCopyAttentionalRecurrentLearner.load("copy_convolutional_att_rec_model" + os.path.basename(params["train_file"]) + ".pkl")
         if len(sys.argv) > 6 and sys.argv[6] == '--load_for_test':
-             model2.load_embeddings_for_test(params)
+            print "[%s] Loading the rest of the pretrained embeddings for evaluating test set" % time.asctime()
+            model2.load_embeddings_for_test(params)
+            print "[%s] Done loading" % time.asctime()
 
         test_data, original_names = model2.naming_data.get_data_in_recurrent_copy_convolution_format(params["test_file"], model2.padding_size)
         test_name_targets, test_code_sentences, test_code, test_target_is_unk, test_copy_vectors = test_data
