@@ -8,14 +8,14 @@ floatX = theano.config.floatX
 
 
 class CopyConvolutionalRecurrentAttentionalModel(object):
-    def __init__(self, hyperparameters, all_voc_size, empirical_name_dist, tokens_dictionary = None, pretrained_embeddings_dictionary = None):
+    def __init__(self, hyperparameters, all_voc_size, empirical_name_dist, tokens_dictionary = None, pretrained_embeddings_dictionary = None, load_all_embeddings = False):
         self.D = hyperparameters["D"]
 
         self.hyperparameters = hyperparameters
         self.__check_all_hyperparmeters_exist()
         self.all_voc_size = all_voc_size
 
-        self.__init_parameter(empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary)
+        self.__init_parameter(empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary, load_all_embeddings)
 
     def __init_parameter(self, empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary):
 
@@ -26,7 +26,10 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
             found_pretrained_word_count = 0
             for word,vector in pretrained_embeddings_dictionary.iteritems():
                 id_in_existing_dictionary = tokens_dictionary.get_id_or_none(word)
-                if not id_in_existing_dictionary == None:
+                if id_in_existing_dictionary == None:
+                    tokens_dictionary.add_or_get_id(word)
+                    all_name_rep = np.concatenate((all_name_rep,np.array([vector])))
+                else:
                     all_name_rep[id_in_existing_dictionary] = vector
                     found_pretrained_word_count += 1
 

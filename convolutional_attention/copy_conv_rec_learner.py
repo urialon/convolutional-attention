@@ -22,6 +22,10 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
         self.padding_size = self.hyperparameters["layer1_window_size"] + self.hyperparameters["layer2_window_size"] + self.hyperparameters["layer3_window_size"] - 3
         self.parameters = None
         self.pretrained_embeddings_dictionary = self.load_pretrained_embeddings(hyperparameters)
+        if hyperparameters.has_key["load_all_embeddings"] and hyperparameters["load_all_embeddings"] == True:
+            self.load_all_embeddings = True
+        else:
+            self.load_all_embeddings = False
 
     def load_pretrained_embeddings(self, hyperparameters):
         if not hyperparameters.has_key("pretrained_embeddings_file"):
@@ -42,7 +46,7 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
 
     def load_embeddings_for_test(self, hyperparameters):
         existing_vectors = self.model.all_name_reps.get_value()
-        pretrained_embeddings_dictionary = self.load_embeddings_for_test(hyperparameters)
+        pretrained_embeddings_dictionary = self.load_pretrained_embeddings(hyperparameters)
         for word, vec in pretrained_embeddings_dictionary.iteritems():
             if self.naming_data.all_tokens_dictionary.is_unk(word):
                 new_id = self.naming_data.all_tokens_dictionary.add_or_get_id(word)
@@ -63,7 +67,7 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
 
         # Create theano model and train
         model = CopyConvolutionalRecurrentAttentionalModel(self.hyperparameters, len(self.naming_data.all_tokens_dictionary),
-                                   self.naming_data.name_empirical_dist, self.naming_data.all_tokens_dictionary, self.pretrained_embeddings_dictionary)
+                                   self.naming_data.name_empirical_dist, self.naming_data.all_tokens_dictionary, self.pretrained_embeddings_dictionary, self.load_all_embeddings)
         self.model = model
 
         def compute_validation_score_names():
@@ -318,6 +322,8 @@ if __name__ == "__main__":
         params["test_file"] = sys.argv[4]
     if len(sys.argv) > 5:
         params["pretrained_embeddings_file"] = sys.argv[5]
+    if len(sys.argv) > 6 and sys.argv[6] == '--load_all_embeddings':
+        params["load_all_embeddings"] = True
     with ExperimentLogger("ConvolutionalCopyAttentionalRecurrentLearner", params) as experiment_log:
         if max_num_epochs:
             model = ConvolutionalCopyAttentionalRecurrentLearner(params)
