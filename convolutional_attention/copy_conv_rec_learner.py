@@ -35,6 +35,7 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
             return {}
         with open(hyperparameters["pretrained_embeddings_file"], 'r') as vectors_file:
             name_to_vec = {}
+            print "[%s] Loading pretrained embeddings" % (time.asctime())
             for i, line in enumerate(vectors_file):
                 line_tokens = line.rstrip().split(' ')
                 if i == 0:
@@ -45,6 +46,7 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
                     vector = np.array([float(x) for x in line_tokens[1:]])
                     assert vector.size == dim
                     name_to_vec[line_tokens[0]] = vector
+            print "[%s] Finished loading embeddings, loaded %d words" % (time.asctime(), len(name_to_vec))
             return name_to_vec
 
     def load_embeddings_for_test(self, hyperparameters):
