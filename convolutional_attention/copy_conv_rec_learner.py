@@ -22,7 +22,7 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
         self.padding_size = self.hyperparameters["layer1_window_size"] + self.hyperparameters["layer2_window_size"] + self.hyperparameters["layer3_window_size"] - 3
         self.parameters = None
         self.pretrained_embeddings_dictionary = self.load_pretrained_embeddings(hyperparameters)
-        if hyperparameters.has_key["load_all_embeddings"] and hyperparameters["load_all_embeddings"] == True:
+        if (hyperparameters.has_key("load_all_embeddings")) and (hyperparameters["load_all_embeddings"] == True):
             self.load_all_embeddings = True
         else:
             self.load_all_embeddings = False
