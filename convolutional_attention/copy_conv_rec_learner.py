@@ -50,7 +50,7 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
         for word, vec in pretrained_embeddings_dictionary.iteritems():
             if self.naming_data.all_tokens_dictionary.is_unk(word):
                 new_id = self.naming_data.all_tokens_dictionary.add_or_get_id(word)
-                existing_vectors = np.concatenate((existing_vectors,vec))
+                existing_vectors = np.concatenate((existing_vectors,np.array([vec])))
         self.model.all_name_reps.set_value(existing_vectors)
 
     def train(self, input_file, patience=10, max_epochs=1000, minibatch_size=500):
