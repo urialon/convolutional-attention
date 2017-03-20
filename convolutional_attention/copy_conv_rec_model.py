@@ -18,16 +18,28 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
 
         self.__init_parameter(empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary)
 
-    def load_embeddings_for_test(self, pretrained_embeddings_dictionary, tokens_dictionary):
+    def load_embeddings_for_test(self, pretrained_embeddings_dictionary, tokens_dictionary, test_tokens_dictionary):
         existing_vectors = self.all_name_reps.get_value()
         new_vectors = []
-        for word, vec in pretrained_embeddings_dictionary.iteritems():
+        loaded_embeddings = 0
+        unseen_words = 0
+        for word in test_tokens_dictionary.get_all_names():
             if tokens_dictionary.is_unk(word):
-                new_id = tokens_dictionary.add_or_get_id(word)
-                new_vectors.append(np.array(vec))
+                unseen_words += 1
+                if pretrained_embeddings_dictionary.has_key(word):
+                    new_id = tokens_dictionary.add_or_get_id(word)
+                    vec = pretrained_embeddings_dictionary[word]
+                    new_vectors.append(np.array(vec))
+                    loaded_embeddings += 1
+        print "[%s] Loaded %d pretrained embeddings for model" % (time.asctime(), loaded_embeddings)
+        print "[%s] %d words in training data, %d words in test data, of them %d are unseen, of them %d are in pretrained embeddings" % \
+              (time.asctime(), len(tokens_dictionary), len(test_tokens_dictionary), unseen_words, loaded_embeddings)
         existing_vectors = np.concatenate((existing_vectors, np.array(new_vectors).astype(floatX)))
         self.all_name_reps.set_value(existing_vectors)
-        self.__compile_model_functions()
+
+        existing_bias = self.name_bias.get_value()
+        existing_bias = np.append(existing_bias, np.log(np.array([4.23e-5] * (loaded_embeddings)).astype(floatX)))
+        self.name_bias.set_value(existing_bias)
 
     def __init_parameter(self, empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary, load_all_embeddings = False):
 

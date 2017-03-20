@@ -309,6 +309,19 @@ class TokenCodeNamingData:
         return naming.get_data_for_recurrent_copy_convolution(names[idxs[:lim]], code[idxs[:lim]], min_code_size),\
                 naming.get_data_for_recurrent_copy_convolution(names[idxs[lim:]], code[idxs[lim:]], min_code_size), naming
 
+
+    @staticmethod
+    def get_data_in_recurrent_copy_convolution_format_without_validation(input_file):
+        names, code, original_names = TokenCodeNamingData.__get_file_data(input_file)
+
+        names = np.array(names, dtype=np.object)
+        code = np.array(code, dtype=np.object)
+        idxs = np.arange(len(names))
+        np.random.shuffle(idxs)
+        naming = TokenCodeNamingData(names[idxs], code[idxs], {}, False)
+        return naming
+
+
     @staticmethod
     def get_data_in_convolution_format_with_validation(input_file, names_cx_size, pct_train, min_code_size):
         assert pct_train < 1

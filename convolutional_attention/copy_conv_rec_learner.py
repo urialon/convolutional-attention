@@ -52,8 +52,10 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
     def load_embeddings_for_test(self, hyperparameters):
         print "[%s] started loading embeddings for test" % (time.asctime())
         self.pretrained_embeddings_dictionary = self.load_pretrained_embeddings(hyperparameters)
-        self.model.load_embeddings_for_test(self.pretrained_embeddings_dictionary, self.naming_data.all_tokens_dictionary )
+        test_naming_data = TokenCodeNamingData.get_data_in_recurrent_copy_convolution_format_without_validation(hyperparameters["test_file"])
 
+        self.model.load_embeddings_for_test(self.pretrained_embeddings_dictionary, self.naming_data.all_tokens_dictionary, test_naming_data.all_tokens_dictionary)
+        self.parameters = [p.get_value() for p in self.model.train_parameters]
         print "[%s] Finished loading embeddings for test" % (time.asctime())
 
     def train(self, input_file, patience=10, max_epochs=1000, minibatch_size=500):
