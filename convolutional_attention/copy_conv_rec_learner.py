@@ -114,10 +114,7 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
                     self.parameters = best_params
                     print "At %s validation: name_ll=%s [best so far]" % (i, name_ll)
                     epochs_not_improved = 0
-                    self.save(
-                        "copy_convolutional_att_rec_model" +
-                        os.path.basename(self.hyperparameters["train_file"]) +
-                        ".pkl")
+                    #self.save("copy_convolutional_att_rec_model" + os.path.basename(self.hyperparameters["train_file"]) +".pkl")
                 else:
                     print "At %s validation: name_ll=%s" % (i, name_ll)
                     epochs_not_improved += 1
@@ -128,6 +125,8 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
 
             if epochs_not_improved >= patience:
                 print "Not improved for %s epochs. Stopping..." % patience
+                self.save("copy_convolutional_att_rec_model" + os.path.basename(self.hyperparameters["train_file"]) +".pkl")
+                print "Saved model"
                 break
             elapsed = int(time.time() - start_time)
             print "Epoch elapsed %sh%sm%ss" % ((elapsed / 60 / 60) % 60, (elapsed / 60) % 60, elapsed % 60)
