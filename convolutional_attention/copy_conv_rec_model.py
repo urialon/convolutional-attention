@@ -22,7 +22,7 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
         existing_vectors = self.all_name_reps.get_value()
         new_vectors = []
         for word, vec in pretrained_embeddings_dictionary.iteritems():
-            if self.naming_data.all_tokens_dictionary.is_unk(word):
+            if tokens_dictionary.is_unk(word):
                 new_id = tokens_dictionary.add_or_get_id(word)
                 new_vectors.append(np.array(vec))
         existing_vectors = np.concatenate((existing_vectors, np.array(new_vectors).astype(floatX)))
