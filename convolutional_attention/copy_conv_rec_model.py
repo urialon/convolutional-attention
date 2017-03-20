@@ -18,6 +18,17 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
 
         self.__init_parameter(empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary)
 
+    def load_embeddings_for_test(self, pretrained_embeddings_dictionary, tokens_dictionary):
+        existing_vectors = self.all_name_reps.get_value()
+        new_vectors = []
+        for word, vec in pretrained_embeddings_dictionary.iteritems():
+            if self.naming_data.all_tokens_dictionary.is_unk(word):
+                new_id = tokens_dictionary.add_or_get_id(word)
+                new_vectors.append(np.array(vec))
+        existing_vectors = np.concatenate((existing_vectors, np.array(new_vectors).astype(floatX)))
+        self.all_name_reps.set_value(existing_vectors)
+        self.__compile_model_functions()
+
     def __init_parameter(self, empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary, load_all_embeddings = False):
 
         all_name_rep = np.random.randn(self.all_voc_size, self.D) * 10 ** self.hyperparameters["log_name_rep_init_scale"]
@@ -30,7 +41,7 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
                 if not id_in_existing_dictionary is None:
                     all_name_rep[id_in_existing_dictionary] = vector
                     found_pretrained_word_count += 1
-            print "[%s] Found %d pretrained words, out of %d total tokens, and out of %d total preterained words" % (time.asctime(), found_pretrained_word_count, len(tokens_dictionary.token_to_id), len(pretrained_embeddings_dictionary))
+            print "[%s] Found %d pretrained words, out of %d total preterained words" % (time.asctime(), found_pretrained_word_count, len(pretrained_embeddings_dictionary))
 
         self.all_name_reps = theano.shared(all_name_rep.astype(floatX), name="code_name_reps")
 

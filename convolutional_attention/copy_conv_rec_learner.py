@@ -51,16 +51,9 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
 
     def load_embeddings_for_test(self, hyperparameters):
         print "[%s] started loading embeddings for test" % (time.asctime())
-        existing_vectors = self.model.all_name_reps.get_value()
-        new_vectors = []
-        pretrained_embeddings_dictionary = self.load_pretrained_embeddings(hyperparameters)
-        for word, vec in pretrained_embeddings_dictionary.iteritems():
-            if self.naming_data.all_tokens_dictionary.is_unk(word):
-                new_id = self.naming_data.all_tokens_dictionary.add_or_get_id(word)
-                new_vectors.append(np.array(vec))
-        existing_vectors = np.concatenate((existing_vectors, np.array(new_vectors).astype(floatX)))
-        self.model.all_name_reps.set_value(existing_vectors)
-        self.model.__compile_model_functions()
+        self.pretrained_embeddings_dictionary = self.load_pretrained_embeddings(hyperparameters)
+        self.model.load_embeddings_for_test(self.pretrained_embeddings_dictionary, self.naming_data.all_tokens_dictionary )
+
         print "[%s] Finished loading embeddings for test" % (time.asctime())
 
     def train(self, input_file, patience=10, max_epochs=1000, minibatch_size=500):
