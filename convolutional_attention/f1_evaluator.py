@@ -3,7 +3,7 @@ import heapq
 import os
 from scipy.integrate import simps
 import os.path
-
+import time
 import numpy as np
 
 
@@ -30,7 +30,8 @@ class F1Evaluator:
             unk_word_accuracy = [self.unk_acc(suggestion[0], real_targets[i].split(','), token_dictionary) for suggestion in result]
             precision_recall = [token_precision_recall(suggestion[0], real_targets[i].split(',')) for suggestion in result]
             result_accumulator.add_result(confidences, is_correct, is_unkd, precision_recall, unk_word_accuracy)
-
+            if (i % 1000 == 0):
+                print "[%s] evaluated %d" % time.asctime(), i
         return result_accumulator
 
     def unk_acc(self, suggested_subtokens, real_subtokens, token_dictionary):
