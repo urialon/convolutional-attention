@@ -32,6 +32,7 @@ class F1Evaluator:
             result_accumulator.add_result(confidences, is_correct, is_unkd, precision_recall, unk_word_accuracy)
             if (i % 1000 == 0):
                 print "[%s] evaluated %d / %d" % (time.asctime(), i, features.shape[0])
+                print '\t' + str(result_accumulator.get_f1_at_all_ranks())
         return result_accumulator
 
     def unk_acc(self, suggested_subtokens, real_subtokens, token_dictionary):

@@ -3,10 +3,16 @@ from theano import tensor as T
 import numpy as np
 from theano.tensor.shared_randomstreams import RandomStreams
 import time
-
+import re
 from theanoutils.optimization import nesterov_rmsprop_multiple, logsumexp, dropout_multiple, log_softmax
 floatX = theano.config.floatX
 
+def normalize_word(word):
+    stripped = re.sub(r'[^a-zA-Z]', '', word)
+    if (len(stripped) == 0):
+        return word.lower()
+    else:
+        return stripped.lower()
 
 class CopyConvolutionalRecurrentAttentionalModel(object):
     def __init__(self, hyperparameters, all_voc_size, empirical_name_dist, tokens_dictionary = None, pretrained_embeddings_dictionary = None, load_all_embeddings = False):
@@ -26,9 +32,10 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
         for word in test_tokens_dictionary.get_all_names():
             if tokens_dictionary.is_unk(word):
                 unseen_words += 1
-                if pretrained_embeddings_dictionary.has_key(word):
+                normalized_word = normalize_word(word)
+                if pretrained_embeddings_dictionary.has_key(normalized_word):
                     new_id = tokens_dictionary.add_or_get_id(word)
-                    vec = pretrained_embeddings_dictionary[word]
+                    vec = pretrained_embeddings_dictionary[normalized_word]
                     new_vectors.append(np.array(vec))
                     loaded_embeddings += 1
         print "[%s] Loaded %d pretrained embeddings for model" % (time.asctime(), loaded_embeddings)
@@ -48,11 +55,18 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
             # Overriding vectors that exist in the pretrained dictionary
             print "[%s] Loading pretrained embeddings (load_all_embeddings=%s)" % (time.asctime(), str(load_all_embeddings))
             found_pretrained_word_count = 0
-            for word,vector in pretrained_embeddings_dictionary.iteritems():
+            for word in tokens_dictionary.get_all_names():
+                normalized_word = normalize_word(word)
+                if pretrained_embeddings_dictionary.has_key(normalized_word):
+                    id_in_existing_dictionary = tokens_dictionary.get_id_or_none(word)
+                    vector = pretrained_embeddings_dictionary[normalize_word]
+                    all_name_rep[id_in_existing_dictionary] = vector
+                    found_pretrained_word_count += 1
+            '''for word,vector in pretrained_embeddings_dictionary.iteritems():
                 id_in_existing_dictionary = tokens_dictionary.get_id_or_none(word)
                 if not id_in_existing_dictionary is None:
                     all_name_rep[id_in_existing_dictionary] = vector
-                    found_pretrained_word_count += 1
+                    found_pretrained_word_count += 1'''
             print "[%s] Found %d pretrained words, out of %d total preterained words" % (time.asctime(), found_pretrained_word_count, len(pretrained_embeddings_dictionary))
 
         self.all_name_reps = theano.shared(all_name_rep.astype(floatX), name="code_name_reps")
