@@ -73,6 +73,7 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
             print "[%s] Found %d pretrained words, out of %d total preterained words" % (time.asctime(), found_pretrained_word_count, len(pretrained_embeddings_dictionary))
 
         if self.should_freeze:
+            print 'Freezing ' + str(len(overriden_vectors_indices)) + ' word vectors'
             self.freeze[overriden_vectors_indices] = np.zeros(self.D)
         self.freeze = theano.shared(self.freeze, name="freeze")
         self.all_name_reps = theano.shared(all_name_rep.astype(floatX), name="code_name_reps")
