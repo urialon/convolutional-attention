@@ -29,6 +29,10 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
             self.load_all_embeddings = True
         else:
             self.load_all_embeddings = False
+        self.should_freeze = False
+        if (hyperparameters.has_key("freeze") and hyperparameters["freeze"] == True):
+            self.should_freeze = True
+
 
     def load_pretrained_embeddings(self, hyperparameters):
         if not hyperparameters.has_key("pretrained_embeddings_file"):
@@ -72,7 +76,7 @@ class ConvolutionalCopyAttentionalRecurrentLearner:
 
         # Create theano model and train
         model = CopyConvolutionalRecurrentAttentionalModel(self.hyperparameters, len(self.naming_data.all_tokens_dictionary),
-                                   self.naming_data.name_empirical_dist, self.naming_data.all_tokens_dictionary, self.pretrained_embeddings_dictionary)
+                                   self.naming_data.name_empirical_dist, self.naming_data.all_tokens_dictionary, self.pretrained_embeddings_dictionary, self.should_freeze)
         self.model = model
 
         def compute_validation_score_names():
@@ -328,6 +332,8 @@ if __name__ == "__main__":
         params["pretrained_embeddings_file"] = sys.argv[5]
     if len(sys.argv) > 6 and sys.argv[6] == '--load_all_embeddings':
         params["load_all_embeddings"] = True
+    if len(sys.argv) > 6 and sys.argv[6] == '--freeze':
+        params["freeze"] = True
     with ExperimentLogger("ConvolutionalCopyAttentionalRecurrentLearner", params) as experiment_log:
         if max_num_epochs:
             model = ConvolutionalCopyAttentionalRecurrentLearner(params)

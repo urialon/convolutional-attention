@@ -15,13 +15,13 @@ def normalize_word(word):
         return stripped.lower()
 
 class CopyConvolutionalRecurrentAttentionalModel(object):
-    def __init__(self, hyperparameters, all_voc_size, empirical_name_dist, tokens_dictionary = None, pretrained_embeddings_dictionary = None, load_all_embeddings = False):
+    def __init__(self, hyperparameters, all_voc_size, empirical_name_dist, tokens_dictionary = None, pretrained_embeddings_dictionary = None, should_freeze = False):
         self.D = hyperparameters["D"]
 
         self.hyperparameters = hyperparameters
         self.__check_all_hyperparmeters_exist()
         self.all_voc_size = all_voc_size
-
+        self.should_freeze = should_freeze
         self.__init_parameter(empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary)
 
     def load_embeddings_for_test(self, pretrained_embeddings_dictionary, tokens_dictionary, test_tokens_dictionary):
@@ -49,6 +49,8 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
         self.name_bias.set_value(existing_bias)
 
     def __init_parameter(self, empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary, load_all_embeddings = False):
+        self.freeze = np.ones((self.all_voc_size, self.D))
+        overriden_vectors_indices = []
 
         all_name_rep = np.random.randn(self.all_voc_size, self.D) * 10 ** self.hyperparameters["log_name_rep_init_scale"]
         if (not tokens_dictionary == None) and (not pretrained_embeddings_dictionary == None):
@@ -62,6 +64,7 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
                     vector = pretrained_embeddings_dictionary[normalize_word]
                     all_name_rep[id_in_existing_dictionary] = vector
                     found_pretrained_word_count += 1
+                    overriden_vectors_indices.append(id_in_existing_dictionary)
             '''for word,vector in pretrained_embeddings_dictionary.iteritems():
                 id_in_existing_dictionary = tokens_dictionary.get_id_or_none(word)
                 if not id_in_existing_dictionary is None:
@@ -69,6 +72,9 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
                     found_pretrained_word_count += 1'''
             print "[%s] Found %d pretrained words, out of %d total preterained words" % (time.asctime(), found_pretrained_word_count, len(pretrained_embeddings_dictionary))
 
+        if self.should_freeze:
+            self.freeze[overriden_vectors_indices] = np.zeros(self.D)
+        self.freeze = theano.shared(self.freeze, name="freeze")
         self.all_name_reps = theano.shared(all_name_rep.astype(floatX), name="code_name_reps")
 
         # By convention, the last one is NONE, which is never predicted.
@@ -322,6 +328,9 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
                                                            name_targets[1:], targets_is_unk[1:])
 
             grad = T.grad(correct_answer_log_prob, self.train_parameters)
+            if self.should_freeze:
+                grad[0] = grad[0] * self.freeze
+
             self.grad_accumulate = theano.function(inputs=[sentence, is_copy_matrix, targets_is_unk, name_targets],
                                                    updates=[(v, v+g) for v, g in zip(grad_acc, grad)] + [(grad_acc[-1], grad_acc[-1]+1)],
                                                    #mode='NanGuardMode'
