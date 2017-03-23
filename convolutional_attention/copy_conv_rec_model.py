@@ -61,7 +61,7 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
                 normalized_word = normalize_word(word)
                 if pretrained_embeddings_dictionary.has_key(normalized_word):
                     id_in_existing_dictionary = tokens_dictionary.get_id_or_none(word)
-                    vector = pretrained_embeddings_dictionary[normalize_word]
+                    vector = pretrained_embeddings_dictionary[normalized_word]
                     all_name_rep[id_in_existing_dictionary] = vector
                     found_pretrained_word_count += 1
                     overriden_vectors_indices.append(id_in_existing_dictionary)
