@@ -44,9 +44,10 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
         existing_vectors = np.concatenate((existing_vectors, np.array(new_vectors).astype(floatX)))
         self.all_name_reps.set_value(existing_vectors)
 
-        existing_bias = self.name_bias.get_value()
+        # NO BIAS
+        '''existing_bias = self.name_bias.get_value()
         existing_bias = np.append(existing_bias, np.log(np.array([4.23e-5] * (loaded_embeddings)).astype(floatX)))
-        self.name_bias.set_value(existing_bias)
+        self.name_bias.set_value(existing_bias)'''
 
     def __init_parameter(self, empirical_name_dist, tokens_dictionary, pretrained_embeddings_dictionary, load_all_embeddings = False):
         self.freeze = np.ones((self.all_voc_size, self.D))
@@ -79,7 +80,9 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
         self.all_name_reps = theano.shared(all_name_rep.astype(floatX), name="code_name_reps")
 
         # By convention, the last one is NONE, which is never predicted.
-        self.name_bias = theano.shared(np.log(empirical_name_dist).astype(floatX)[:-1], name="name_bias")
+        #self.name_bias = theano.shared(np.log(empirical_name_dist).astype(floatX)[:-1], name="name_bias")
+        # NO BIAS
+        self.name_bias = theano.shared(np.array([]).astype(floatX)[:-1], name="name_bias")
 
         conv_layer1_code = np.random.randn(self.hyperparameters["conv_layer1_nfilters"], 1,
                                      self.hyperparameters["layer1_window_size"], self.D) * 10 ** self.hyperparameters["log_layer1_init_scale"]
@@ -294,8 +297,9 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
                                                                            name="target_name_scan",
                                                                            non_sequences=non_sequences, strict=True)
 
-        name_log_probs = log_softmax(T.dot(predictions, T.transpose(self.all_name_reps[:-1])) + self.name_bias) # SxD, DxK -> SxK
-
+        #NO BIAS
+        #name_log_probs = log_softmax(T.dot(predictions, T.transpose(self.all_name_reps[:-1])) + self.name_bias) # SxD, DxK -> SxK
+        name_log_probs = log_softmax(T.dot(predictions, T.transpose(self.all_name_reps[:-1]))) # SxD, DxK -> SxK
         return sentence, name_targets, copy_weights, attention_weights, copy_probs, name_log_probs, filtered_features
 
     def model_objective(self, copy_probs, copy_weights, is_copy_matrix, name_log_probs, name_targets, targets_is_unk):
