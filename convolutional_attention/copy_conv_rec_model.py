@@ -166,7 +166,7 @@ class CopyConvolutionalRecurrentAttentionalModel(object):
                                  self.gru_prediction_to_reset, self.gru_prediction_to_hidden, self.gru_prediction_to_update,
                                  self.gru_prev_hidden_to_reset, self.gru_prev_hidden_to_next, self.gru_prev_hidden_to_update,
                                  self.gru_hidden_update_bias, self.gru_update_bias, self.gru_reset_bias,
-                                 self.conv_layer3_att_code, self.conv_layer3_att_bias, self.name_bias]
+                                 self.conv_layer3_att_code, self.conv_layer3_att_bias] #, self.name_bias] # NO BIAS
 
         self.__compile_model_functions()
 
