@@ -306,8 +306,12 @@ if __name__ == "__main__":
     max_num_epochs = int(sys.argv[2])
     params = {
         "D": int(sys.argv[3]),
-        "conv_layer1_nfilters": 32,
-        "conv_layer2_nfilters": 16,
+        # Uri
+        #"conv_layer1_nfilters": 32,
+        "conv_layer1_nfilters": 64,
+        # Uri
+        # "conv_layer2_nfilters": 16,
+        "conv_layer2_nfilters": 32,
         "layer1_window_size": 18,
         "layer2_window_size": 19,
         "layer3_window_size": 2,
