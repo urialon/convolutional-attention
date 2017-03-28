@@ -308,11 +308,9 @@ if __name__ == "__main__":
         "D": int(sys.argv[3]),
         # Uri
         #"conv_layer1_nfilters": 32,
-        "conv_layer1_nfilters": 64,
+        "conv_layer1_nfilters": 256,
         "conv_layer2_nfilters": 16,
-        # Uri
-        #"layer1_window_size": 18,
-        "layer1_window_size": 36,
+        "layer1_window_size": 18,
         "layer2_window_size": 19,
         "layer3_window_size": 2,
         "log_name_rep_init_scale": -1,
